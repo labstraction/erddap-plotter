@@ -1,0 +1,51 @@
+*{
+    box-sizing: border-box;
+}
+
+html, body{
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.light{
+    --color-primary: #1e90ff;
+    --color-secondary: #ff6347;
+    --color-background: #ffffff;
+    --color-text: #111131;
+}
+
+.themed{
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: monospace;
+}
+
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading {
+    animation: loading 1s alternate-reverse infinite;
+}
+
+@keyframes loading {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
