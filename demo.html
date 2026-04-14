@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="graph"></div>  
+  <script> 
+  // Plot ///////////////////////////////////////////
+  var windowSize = 300;
+  var signalFrequency = 10;
+  var binWidth = 128;
+
+  // Initial static plot
+  var initialArr = new Array(windowSize).fill(0);
+  initialArr[0] = 1;
+  var dataPlot = [
+            {
+              x: [1,2],
+              z: [initialArr],
+              showscale: false,
+              colorscale: 'Hot',
+              type: 'heatmap'
+            }
+          ];
+  Plotly.plot('graph', dataPlot, {});
+
+  // Updating the plot
+  var dataMatrix = []; // 
+  // Initializing the dataMatrix with zeros based on the window size. 
+  // This shows the black part of the graph when the data starts to appear.
+  for(var i = 0; i < windowSize; i++) {
+    dataMatrix[i] = new Array(binWidth).fill(0);
+  }
+
+  // @ToDo: Remove the interval and keep updating the singleFftArray with actual sensor data bins
+  // Start a signal frequency
+  var interval = setInterval(function() {
+    var singleFftArray = []; // binWidth 
+    for(var i = 0; i < binWidth; i++) {
+      singleFftArray[i] = Math.round(Math.random()*100);
+    }
+    // For a fixed window size,
+    // Push the latest data and remove the first element
+    if(dataMatrix.length > windowSize) {
+      dataMatrix.push(singleFftArray)
+      dataMatrix.splice(0, 1)
+    } else {
+      dataMatrix.push(singleFftArray);
+    }
+    var dataUpdate = {
+      z: [transpose(dataMatrix)]
+    };
+    Plotly.update('graph', dataUpdate)
+  }, signalFrequency); 
+
+  // Function to transpose a two dimensional matrix
+  function transpose(a) {
+      return Object.keys(a[0]).map(function(c) {
+          return a.map(function(r) { return r[c]; });
+      });
+   }
+  </script>
+</body>
+</html>

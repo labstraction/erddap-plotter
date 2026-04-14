@@ -5,33 +5,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="./main.css">
+    <script src="https://cdn.plot.ly/plotly-3.4.0.min.js" charset="utf-8"></script>
+    <link href="node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
+    <script src="node_modules/gridstack/dist/gridstack-all.js"></script>
 </head>
 
-<body>
-    <script src="node_modules/gridstack/dist/gridstack-all.js"></script>
-    <link href="node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
-    <style type="text/css">
-        .grid-stack {
-            background: #FAFAD2;
-        }
-
-        .grid-stack-item-content {
-            background-color: #18BC9C;
-        }
-    </style>
-
-    <div class="grid-stack"></div>
-
+<body class="dark">
+    <div class="grid-stack light themed-base">
+        <div class="grid-stack-item" gs-w="4" gs-h="4" gs-x="0" gs-y="0">
+            <div class="grid-stack-item-content flex-column">
+                <div class="card-header flex-row flex-center">
+                    <span>drag here</span>
+                </div>
+                <plot-component plot-url="https://nodc.ogs.it/erddap/tabledap/MAMBO1_SBE16PLS01.json" plot-x="time" plot-y="TEMP" plot-type="timeseries" style="flex: 1;"></plot-component>
+            </div>
+        </div>
+    </div>
+  <plot-configurator params='["time","TEMP","SAL","DEPTH"]'></plot-configurator>
     <script type="text/javascript">
-        var items = [
-            { content: 'my first widget' }, // will default to location (0,0) and 1x1
-            { w: 2, content: 'another longer widget!' } // will be placed next at (1,0) and 2x1
-        ];
-        var grid = GridStack.init();
-        grid.load(items);
+
+        var grid = GridStack.init({handle: '.card-header'});
+
+      
     </script>
 
 
 </body>
-
+<script type="module" src="./app.js"></script>
+<script type="module" src="./plot-component.js"></script>
+<script type="module" src="./plot-configurator.js"></script>
 </html>
