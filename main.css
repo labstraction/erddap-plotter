@@ -1,84 +1,128 @@
-*{
+* {
     box-sizing: border-box;
 }
 
-html, body{
+html,
+body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
 }
 
-:root{
+.grid-stack {
+    width: 100%;
+    min-height: 100vh;
+}
+
+:root {
     --color-primary: #1e90ff;
+    --color-primary-transp: #1e90ff88;
     --color-primary-text: #ffffff;
     --color-secondary: #ff6347;
     --color-secondary-text: #ffffff;
     --color-base: #ffffff;
     --color-base-text: #111131;
 }
-:root[class="dark"]{
+
+:root[class="dark"] {
     --color-primary: #ff1e1e;
     --color-secondary: #ff6347;
     --color-base: #ffffff;
     --color-text: #111131
 }
 
-.themed-base{
+.themed-base {
     background-color: var(--color-base);
     color: var(--color-base-text);
     font-family: monospace;
 }
 
-.themed-primary{
+.themed-primary {
     background-color: var(--color-primary);
     color: var(--color-primary-text);
     font-family: monospace;
 }
 
-.themed-secondary{
+.themed-secondary {
     background-color: var(--color-secondary);
     color: var(--color-secondary-text);
     font-family: monospace;
 }
 
-.flex-row{
+.flex-row {
     display: flex;
     flex-direction: row;
 }
 
-.flex-column{
+.flex-column {
     display: flex;
     flex-direction: column;
 }
 
-.flex-center{
+.flex-center {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.flex-1 {
+    flex: 1;
 }
 
 .loading {
     animation: loading 1s alternate-reverse infinite;
 }
 
+.shadow {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fixed-stretch {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.background-transp {
+    backdrop-filter: blur(5px);
+    background-color: var(--color-primary-transp);
+}
+
+.padding {
+    padding: 2em;
+}
+
+.round-button {
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1;
+}
+
 @keyframes loading {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-.grid-stack-item{
-    border: 1px solid var(--color-primary);
-    border-radius: 4px;
-    background-color: var(--color-base);
-    color: var(--color-text);
-}
-
-plot-configurator{
+plot-configurator {
     position: fixed;
     bottom: 10px;
     right: 10px;
+}
+
+plot-creator {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
 }

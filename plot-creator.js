@@ -1,142 +1,54 @@
-class PlotConfigurator extends HTMLElement {
+class PlotCreator extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this._params = [];
-        this._types = ['timeseries', 'profile'];
-        this._selectedType = this._types[0];
         this._modalOpen = false;
-
-        this.y1ColorIndex = 0;
-        this.y2ColorIndex = 0;
-        this.y2ColorShift = 198; // shift of 180° + 18° to avoid red-green overlap
     }
 
     static get observedAttributes() {
-        return ['params'];
+        return ['plot-types', 'plot-params'];
     }
-
-    getY1Color() {
-        const color = hslToHex(randomHslColor(this.y1ColorIndex));
-        this.y1ColorIndex++;
-        return color;
-    }
-
-    getY2Color() {
-        const color = hslToHex(randomHslColor(this.y2ColorIndex, this.y2ColorShift));
-        this.y2ColorIndex++;
-        return color;
-    }
-
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'params' && oldValue !== newValue) {
-            try {
-                this._params = JSON.parse(newValue);
-                console.log('Updated params:', this._params);
-            } catch {
-                this._params = [];
+        if (oldValue !== newValue) {
+            if (name === 'plot-types') {
+                this._types = tryParseJSON(newValue, []);
+            } else if (name === 'plot-params') {
+                this._params = tryParseJSON(newValue, []);
             }
+            this.render(this._types, this._params);
         }
-        this.render();
     }
 
     connectedCallback() {
-        this.render();
+        this.render(this._types, this._params);
     }
 
-    openModal() {
-        this._modalOpen = true;
-        this.render();
+    toggleModal() {
+        this._modalOpen = !this._modalOpen;
+        this.render(this._types, this._params);
     }
 
-    closeModal() {
-        this._modalOpen = false;
-        this.render();
+    getStyle() {
+        return `
+        <style>
+            @import './main.css';
+        </style>
+        `;
     }
 
     render() {
-        const style = `
-        <style>
-        #openBtn {
-            background-color: var(--color-primary, #ffffff);
-            color: var(--color-primary-text, #000000);
-            border: none;
-            padding: 10px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 1.5em;
-            cursor: pointer;
-            text-align: center;
-            line-height: 1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .modal-bg {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100000;
-            -webkit-transform: translateZ(0);
-        }
-        .modal {
-            background: #fff;
-            padding: 2em;
-            min-width: 350px;
-            max-width: 90vw;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.2);
-            position: relative;
-        }
-        .close-btn {
-            position: absolute;
-            top: 0.5em;
-            right: 0.5em;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-        .form-row {
-            margin-bottom: 1em;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5em;
-        }
-        .y-params-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5em;
-        }
-        .y-param-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-        }
-        .add-y-btn {
-            width: 20px;
-            height: 20px;
-            padding: 0;
-            cursor: pointer;
-        }
-        input[type="color"] {
-            width: 20px;
-            height: 20px;
-            padding: 1;
-            line-height: 1;
-        }
 
-        </style>
-        `;
         this.shadowRoot.innerHTML = `
-            ${style}
-            <button id="openBtn">+</button>
+             ${this.getStyle()}
+            <button class="themed-primary round-button shadow" id="openBtn">+</button>
             ${this._modalOpen ? this.modalTemplate() : ''}
         `;
-        this.shadowRoot.getElementById('openBtn').onclick = () => this.openModal();
+
+
+        this.shadowRoot.getElementById('openBtn').onclick = () => this.toggleModal();
+
+
         if (this._modalOpen) {
             this.shadowRoot.getElementById('closeBtn').onclick = () => this.closeModal();
             this.shadowRoot.getElementById('addY1Btn').onclick = () => this.addYParam('y1');
@@ -193,18 +105,20 @@ class PlotConfigurator extends HTMLElement {
     modalTemplate() {
   
         const typeOptions = this._types.map(t => `<option value="${t}">${t}</option>`).join('');
+
+        const paramsOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
+
         let xOptions = '';
         if(this._selectedType === 'timeseries') {
             xOptions = "<option value='time'>time</option>" 
         } else{
-            xOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
+            xOptions = paramsOptions
         }
-        const yOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
-        const colorOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
+
         return `
-        <div id="modal-bg" class="modal-bg">
-            <div class="modal">
-                <button class="close-btn" id="closeBtn">&times;</button>
+        <div class="fixed-stretch background-transp flex-row flex-center">
+            <div class="themed-base shadow padding flex-column">
+                <button id="closeBtn">&times;</button>
                 <form id="plotForm">
                     <div class="form-row">
                         <label>plot type:</label>
@@ -224,9 +138,9 @@ class PlotConfigurator extends HTMLElement {
                             <div class="y-param-row y1-param-row">
                                 <select name="y1">
                                     <option value="">--</option>
-                                    ${yOptions}
+                                    ${paramsOptions}
                                 </select>
-                                <input type="color" name="y1Color" value="${this.getY1Color()}" />
+                                <input type="color" name="y1Color" value="blue" />
                             </div>
                         </div>
                         <button type="button" class="add-y-btn" id="addY1Btn">+</button>
@@ -237,9 +151,9 @@ class PlotConfigurator extends HTMLElement {
                             <div class="y-param-row y2-param-row">
                                 <select name="y2">
                                     <option value="">--</option>
-                                    ${yOptions}
+                                    ${paramsOptions}
                                 </select>
-                                <input type="color" name="y2Color" value="${this.getY2Color()}" />
+                                <input type="color" name="y2Color" value="red" />
                             </div>
                         </div>
                         <button type="button" class="add-y-btn" id="addY2Btn">+</button>
@@ -248,7 +162,7 @@ class PlotConfigurator extends HTMLElement {
                         <label>Parametro colorazione:</label>
                         <select name="color">
                             <option value="">--</option>
-                            ${colorOptions}
+                            ${paramsOptions}
                         </select>
                     </div>
 
@@ -278,7 +192,7 @@ class PlotConfigurator extends HTMLElement {
     }
 }
 
-customElements.define('plot-configurator', PlotConfigurator);
+customElements.define('plot-creator', PlotCreator);
 
 
                     // <div class="form-row">

@@ -12,27 +12,16 @@
 </head>
 
 <body class="dark">
-    <div class="grid-stack light themed-base">
-        <div class="grid-stack-item" gs-w="4" gs-h="4" gs-x="0" gs-y="0">
-            <div class="grid-stack-item-content flex-column">
-                <div class="card-header flex-row flex-center">
-                    <span>drag here</span>
-                </div>
-                <plot-component plot-url="https://nodc.ogs.it/erddap/tabledap/MAMBO1_SBE16PLS01.json" plot-x="time" plot-y="TEMP" plot-type="timeseries" style="flex: 1;"></plot-component>
-            </div>
-        </div>
+    <div id="grid" class="grid-stack light themed-base">
     </div>
-  <plot-configurator params='["time","TEMP","SAL","DEPTH"]'></plot-configurator>
-    <script type="text/javascript">
-
-        var grid = GridStack.init({handle: '.card-header'});
-
-      
-    </script>
-
-
+  <plot-configurator></plot-configurator>
+  <plot-creator plot-types='["timeseries","profile"]'></plot-creator>
 </body>
-<script type="module" src="./app.js"></script>
+<script src="./utils.js"></script>
 <script type="module" src="./plot-component.js"></script>
+<script type="module" src="./plot-timeseries.js"></script>
 <script type="module" src="./plot-configurator.js"></script>
+<script type="module" src="./plot-creator.js"></script>
+<script type="module" src="./app.js"></script>
+
 </html>
