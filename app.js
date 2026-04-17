@@ -4,10 +4,10 @@ const initGrid = () => {
         animate: false,
         margins: 4,
         columnOpts: {
-        columnMax: 3,
+        columnMax: 6,
         layout: 'list',
         breakpointForWindow: true,  // test window vs grid size
-        breakpoints: [{w:750, c:1},{w:1500, c:2}]
+        breakpoints: [{w:750, c:2},{w:1500, c:4}]
       },
     });
     return grid;
@@ -92,6 +92,10 @@ const main = async () => {
         const newPlotCard = createNewPlotCard(config);
         grid.makeWidget(newPlotCard);
     });
+
+    const configModal = document.querySelector('config-modal');
+    configModal.setAttribute('plot-params', JSON.stringify(plottableVariables));
+
 };
 
 main();

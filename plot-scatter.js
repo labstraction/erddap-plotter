@@ -80,7 +80,7 @@ class PlotScatter extends HTMLElement {
         const y1Param = y.name;
         const colorParam = color.name;
         console.log('Constructed query parameters with color:', { xparam, y1Param, colorParam });
-        const queryUrl = `${url}?${xparam},${y1Param},${colorParam}&time>=now-30d`;
+        const queryUrl = `${url}?${xparam},${y1Param},${colorParam}&time>=max(time)-356d`;
         return fetch(queryUrl)
         .then(response => response.json())
         .then(data => {

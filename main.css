@@ -148,6 +148,12 @@ body {
     margin: 0px;
 }
 
+.text-button:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--color-secondary);
+}
+
 .modal {
     max-width: 100vw;
     max-height: 100vh;
@@ -172,4 +178,9 @@ plot-creator {
     right: 10px;
 }
 
+config-modal {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+}
 

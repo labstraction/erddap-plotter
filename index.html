@@ -14,8 +14,12 @@
 <body class="dark">
   <div id="grid" class="grid-stack light themed-base"></div>
   <plot-creator plot-types='["timeseries", "scatter", "heatmap"]'></plot-creator>
+  <config-modal plot-types='{"timeseries": {"form": "timeseries-form", "plot": "timeseries-plot"}, "scatter": {"form": "scatter-form", "plot": "scatter-plot"}, "heatmap": {"form": "heatmap-form", "plot": "heatmap-plot"}}'></config-modal>
 </body>
 <script src="./utils.js"></script>
+<script src="./config-modal.js"></script>
+<script src="./timeseries/timeseries-form.js"></script>
+<script src="./timeseries/timeseries-plot.js"></script>
 <script type="module" src="./plot-timeseries.js"></script>
 <script type="module" src="./plot-scatter.js"></script>
 <script type="module" src="./plot-creator.js"></script>

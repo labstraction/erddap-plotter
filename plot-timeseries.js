@@ -60,7 +60,7 @@ class PlotTimeseries extends HTMLElement {
         const y1Param = y1.map(trace => trace.name).join(',');
         const y2Param = y2 && y2.length ? ',' + y2.map(trace => trace.name).join(',') : '';
         console.log('Constructed query parameters with y2:', { xparam, y1Param, y2Param });
-        const queryUrl = `${url}?${xparam},${y1Param}${y2Param}&time>=now-10d`;
+        const queryUrl = `${url}?${xparam},${y1Param}${y2Param}&time>=max(time)-100d`;
         return fetch(queryUrl)
         .then(response => response.json())
         .then(data => {
