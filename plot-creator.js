@@ -3,6 +3,7 @@ class PlotCreator extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         this._modalOpen = false;
+        this._connected = false;
     }
 
     static get observedAttributes() {
@@ -15,6 +16,7 @@ class PlotCreator extends HTMLElement {
                 this._types = tryParseJSON(newValue, []);
             } else if (name === 'plot-params') {
                 this._params = tryParseJSON(newValue, []);
+                this._selectedType = this._types[0] || null;
             }
             this.render(this._types, this._params);
         }
@@ -22,6 +24,11 @@ class PlotCreator extends HTMLElement {
 
     connectedCallback() {
         this.render(this._types, this._params);
+        this._connected = true;
+    }
+
+    disconnectedCallback() {
+        this._connected = false;
     }
 
     toggleModal() {
@@ -39,6 +46,8 @@ class PlotCreator extends HTMLElement {
 
     render() {
 
+        if (!this._connected) return;
+
         this.shadowRoot.innerHTML = `
              ${this.getStyle()}
             <button class="themed-primary round-button shadow" id="openBtn">+</button>
@@ -50,124 +59,151 @@ class PlotCreator extends HTMLElement {
 
 
         if (this._modalOpen) {
-            this.shadowRoot.getElementById('closeBtn').onclick = () => this.closeModal();
-            this.shadowRoot.getElementById('addY1Btn').onclick = () => this.addYParam('y1');
-            this.shadowRoot.getElementById('addY2Btn').onclick = () => this.addYParam('y2');
+
+            this.shadowRoot.getElementById('closeBtn').onclick = () => this.toggleModal();
+
             this.shadowRoot.getElementById('typeSelect').onchange = (e) => this.onTypeChange(e);
+
+            const addY1Btn = this.shadowRoot.getElementById('addY1Btn');
+            if(addY1Btn){
+                addY1Btn.onclick = () => this.addYParam('y1');
+            }
+
+            const addY2Btn = this.shadowRoot.getElementById('addY2Btn');
+            if(addY2Btn){
+                addY2Btn.onclick = () => this.addYParam('y2');
+            }
+
             this.shadowRoot.getElementById('plotForm').onsubmit = (e) => {
+
                 e.preventDefault();
+
                 const form = e.target;
+
                 const type = form.type.value;
+
                 const x = this._params.find(p => p.name === form.x.value) || null;
-                const y1Rows = Array.from(this.shadowRoot.querySelectorAll('.y1-param-row'));
-                const y1 = y1Rows.reduce((acc, row) => {
-                    const p = this._params.find(p => p.name === row.querySelector('select[name="y1"]').value) || null;
+
+                const y1Selects = form.querySelectorAll('select[name="y1"]');
+
+                const y1 = Array.from(y1Selects).reduce((acc, select) => {
+                    const p = this._params.find(p => p.name === select.value) || null;
                     if (p) {
-                        acc.push({ param: p, color: row.querySelector('input[name="y1Color"]').value });
+                        acc.push(p);
                     }
                     return acc;
                 }, []);
-                const y2Rows = Array.from(this.shadowRoot.querySelectorAll('.y2-param-row'));
-                const y2 = y2Rows.reduce((acc, row) => {
-                    const p = this._params.find(p => p.name === row.querySelector('select[name="y2"]').value) || null;
+
+                const y2Selects = form.querySelectorAll('select[name="y2"]');
+                const y2 = Array.from(y2Selects).reduce((acc, select) => {
+                    const p = this._params.find(p => p.name === select.value) || null;
                     if (p) {
-                        acc.push({ param: p, color: row.querySelector('input[name="y2Color"]').value });
+                        acc.push(p);
                     }
                     return acc;
                 }, []);
-                // Parametro colorazione
-                let colorParam = '';
-                if (type === 'scatter' || type === 'heatmap') {
-                    colorParam = form.color.value;
+
+
+                const plotData = {
+                    type,
+                    x,
+                    y1,
+                    y2,
                 }
-                // Range temporale
-                // const start = form.start.value;
-                // const end = form.end.value;
-                // Evento custom
-                this.dispatchEvent(new CustomEvent('plot-configured', {
-                    detail: {
-                        type,
-                        x,
-                        y1,
-                        y2,
-                        color: colorParam,
-                        // start,
-                        // end
-                    },
+
+                if(form.color){
+                    const colorParam = this._params.find(p => p.name === form.color.value) || null;
+                    plotData.color = colorParam;
+                }
+
+
+                this.dispatchEvent(new CustomEvent('plot-created', {
+                    detail: plotData,
                     bubbles: true,
                     composed: true
                 }));
-                this.closeModal();
+                this.toggleModal();
             };
         }
     }
 
     modalTemplate() {
   
-        const typeOptions = this._types.map(t => `<option value="${t}">${t}</option>`).join('');
+        const typeOptions = this._types.map(t => {
+            if(t === this._selectedType) {
+                return `<option value="${t}" selected>${t}</option>`
+            }
+            return `<option value="${t}">${t}</option>`
+        }).join('');
 
-        const paramsOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
+        this._paramsOptions = this._params.map(p => `<option title="${p.longName} (${p.unit})" value="${p.name}">${p.name}</option>`).join('');
 
         let xOptions = '';
         if(this._selectedType === 'timeseries') {
             xOptions = "<option value='time'>time</option>" 
         } else{
-            xOptions = paramsOptions
+            xOptions = this._paramsOptions
         }
 
         return `
         <div class="fixed-stretch background-transp flex-row flex-center">
-            <div class="themed-base shadow padding flex-column">
-                <button id="closeBtn">&times;</button>
-                <form id="plotForm">
-                    <div class="form-row">
-                        <label>plot type:</label>
+            <div class="themed-base shadow padding flex-column align-end modal">
+                <button id="closeBtn" class="font-button">&times;</button>
+                <form id="plotForm" class="flex-column padding gap">
+                    <div class="flex-row align-center gap">
+                        <label class="bold">plot type:</label>
                         <select id="typeSelect" name="type">
                             ${typeOptions}
                         </select>
                     </div>
-                    <div class="form-row">
-                        <label>X Axis:</label>
+                    <div class="flex-row align-center gap">
+                        <label class="bold">x axis:</label>
                         <select name="x">
                             ${xOptions}
                         </select>
                     </div>
-                    <div class="form-row y-section">
-                        <label>Y Axis 1:</label>
-                        <div id="y1Params" class="y-params-container">
-                            <div class="y-param-row y1-param-row">
+                    ${this._selectedType === 'timeseries' ? `
+                    <div class="flex-column gap">
+                        <div class="flex-row align-center gap">
+                            <label class="bold">y axis 1</label>
+                            <button type="button" class="font-button" id="addY1Btn">+</button>
+                        </div>
+                        <ol id="y1Params" class="flex-column gap">
+                            <li>
+                                <label>variable:</label>
                                 <select name="y1">
                                     <option value="">--</option>
-                                    ${paramsOptions}
+                                    ${this._paramsOptions}
                                 </select>
-                                <input type="color" name="y1Color" value="blue" />
-                            </div>
-                        </div>
-                        <button type="button" class="add-y-btn" id="addY1Btn">+</button>
+                            </li>
+                        </ol>
                     </div>
-                    <div class="form-row y-section">
-                        <label>Asse Y2:</label>
-                        <div id="y2Params" class="y-params-container">
-                            <div class="y-param-row y2-param-row">
-                                <select name="y2">
-                                    <option value="">--</option>
-                                    ${paramsOptions}
-                                </select>
-                                <input type="color" name="y2Color" value="red" />
-                            </div>
+                    
+                    <div class="flex-column gap">
+                        <div class="flex-row align-center gap">
+                            <label class="bold">y axis 2:</label>
+                            <button type="button" class="font-button" id="addY2Btn">+</button>
                         </div>
-                        <button type="button" class="add-y-btn" id="addY2Btn">+</button>
-                    </div>
-                    <div class="form-row" id="colorRow" style="display:none;">
-                        <label>Parametro colorazione:</label>
+                        <ol id="y2Params" class="flex-column gap">
+                        </ol>
+                    </div> ` : 
+                    `<div class="flex-row align-center gap">
+                        <label class="bold">y axis:</label>
+                        <select name="y1">
+                            <option value="">--</option>
+                            ${this._paramsOptions}
+                        </select>
+                    </div>`}
+                    ${(this._selectedType === 'scatter' || this._selectedType === 'heatmap') ? `
+                    <div class="flex-row align-center gap">
+                        <label class="bold">color by:</label>
                         <select name="color">
                             <option value="">--</option>
-                            ${paramsOptions}
+                            ${this._paramsOptions}
                         </select>
-                    </div>
-
-                    <div class="form-row" style="justify-content: flex-end;">
-                        <button type="submit">create</button>
+                    </div>` : ''}
+                    <div class="flex-row justify-end">
+                        <button class="text-button themed-primary" type="submit">create</button>
                     </div>
                 </form>
             </div>
@@ -175,14 +211,22 @@ class PlotCreator extends HTMLElement {
         `;
     }
 
+
+
+
     addYParam(axis) {
         const yParams = this.shadowRoot.getElementById(axis === 'y1' ? 'y1Params' : 'y2Params');
-        const yOptions = this._params.map(p => `<option title="${p.longName}" value="${p.name}">${p.name}</option>`).join('');
-        const div = document.createElement('div');
-        div.className = `y-param-row ${axis}-param-row`;
-        div.innerHTML = `<select name="${axis}">${yOptions}</select> <input type="color" name="${axis}Color" value="${axis === 'y1' ? this.getY1Color() : this.getY2Color()}" /> <button type="button" class="remove-y-btn">-</button>`;
-        div.querySelector('.remove-y-btn').onclick = () => div.remove();
-        yParams.appendChild(div);
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <label>variable:</label>
+            <select name="${axis}">
+                <option value="">--</option>
+                ${this._paramsOptions}
+            </select>
+            <button type="button" class="font-button">-</button>
+        `;
+        li.querySelector('button').onclick = () => li.remove()
+        yParams.appendChild(li);
     }
 
     onTypeChange(e) {
@@ -195,9 +239,6 @@ class PlotCreator extends HTMLElement {
 customElements.define('plot-creator', PlotCreator);
 
 
-                    // <div class="form-row">
-                    //     <label>Range temporale:</label>
-                    //     <input type="date" name="start" />
-                    //     <span>→</span>
-                    //     <input type="date" name="end" />
-                    // </div>
+
+
+               

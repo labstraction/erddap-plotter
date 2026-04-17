@@ -52,7 +52,12 @@ const getPlottableVariables = async (erddapURL, dataset) => {
 }
 
 const createNewPlotCard = (config) => {
-    const plot = document.createElement('plot-timeseries');
+    let plot;
+    if(config.type === 'scatter' || config.type === 'heatmap') {
+        plot = document.createElement('plot-scatter');
+    } else {
+        plot = document.createElement('plot-timeseries');
+    }
     plot.setAttribute('plot-config', JSON.stringify(config));
     plot.classList.add('flex-1');
     const wrapper = document.createElement('div');
@@ -78,23 +83,14 @@ const main = async () => {
     const plottableVariables = await getPlottableVariables(erddapURL, dataset);
     console.log('Plottable variables:', plottableVariables);
 
-    const configurator = document.querySelector('plot-configurator');
-    configurator.setAttribute('params', JSON.stringify(plottableVariables));
-    configurator.addEventListener('plot-configured', (event) => {
-        const config = event.detail;
-        config.url = erddapURL + '/tabledap/' + dataset + '.json';
-        const newPlotCard = createNewPlotCard(config);
-        grid.makeWidget(newPlotCard);
-    });
-
     const creator = document.querySelector('plot-creator');
     creator.setAttribute('plot-params', JSON.stringify(plottableVariables));
     creator.addEventListener('plot-created', (event) => {
         console.log('Received plot-created event with config:', event.detail);
-            // const config = event.detail;
-            // config.url = erddapURL + '/tabledap/' + dataset + '.json';
-            // const newPlotCard = createNewPlotCard(config);
-            // grid.makeWidget(newPlotCard);
+        const config = event.detail;
+        config.url = erddapURL + '/tabledap/' + dataset + '.json';
+        const newPlotCard = createNewPlotCard(config);
+        grid.makeWidget(newPlotCard);
     });
 };
 

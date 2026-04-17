@@ -57,8 +57,8 @@ class PlotTimeseries extends HTMLElement {
 
     getErddapData(url, x, y1, y2, message) {
         const xparam = x.name;
-        const y1Param = y1.map(trace => trace.param.name).join(',');
-        const y2Param = y2 && y2.length ? ',' + y2.map(trace => trace.param.name).join(',') : '';
+        const y1Param = y1.map(trace => trace.name).join(',');
+        const y2Param = y2 && y2.length ? ',' + y2.map(trace => trace.name).join(',') : '';
         console.log('Constructed query parameters with y2:', { xparam, y1Param, y2Param });
         const queryUrl = `${url}?${xparam},${y1Param}${y2Param}&time>=now-10d`;
         return fetch(queryUrl)
@@ -73,14 +73,14 @@ class PlotTimeseries extends HTMLElement {
             const xData = sorted.map(row => row[0]);
 
             let traces = y1.map(trace => {
-                const yData = sorted.map(row => row[data.table.columnNames.indexOf(trace.param.name)]);
-                return { x: xData, y: yData, mode: 'lines', type: 'scatter', name: trace.param.longName || trace.param.name };
+                const yData = sorted.map(row => row[data.table.columnNames.indexOf(trace.name)]);
+                return { x: xData, y: yData, mode: 'lines', type: 'scatter', name: trace.name };
             });
 
             if (y2 && y2.length) {
                 traces = traces.concat(y2.map(trace => {
-                    const yData = sorted.map(row => row[data.table.columnNames.indexOf(trace.param.name)]);
-                    return { x: xData, y: yData, mode: 'lines', type: 'scatter', yaxis: 'y2', name: trace.param.longName || trace.param.name };
+                    const yData = sorted.map(row => row[data.table.columnNames.indexOf(trace.name)]);
+                    return { x: xData, y: yData, mode: 'lines', type: 'scatter', yaxis: 'y2', name: trace.name };
                 }));
             }
   
@@ -108,7 +108,7 @@ class PlotTimeseries extends HTMLElement {
             hovermode: 'x unified',
             yaxis: {
                 title: {
-                    text: this._config.y1[0].param.unit || 'y axis'
+                    text: this._config.y1[0].unit || 'y axis'
                 }
             },
             "legend": {
@@ -123,7 +123,7 @@ class PlotTimeseries extends HTMLElement {
         if (traces.some(trace => trace.yaxis === 'y2')) {
             layout.yaxis2 = {
                 title: {
-                    text: this._config.y2[0].param.unit || 'y2 axis'
+                    text: this._config.y2[0].unit || 'y2 axis'
                 },
                 overlaying: 'y',
                 side: 'right'

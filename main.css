@@ -60,9 +60,20 @@ body {
 }
 
 .flex-center {
-    display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.align-end {
+    align-items: flex-end;
+}
+
+.justify-end {
+    justify-content: flex-end;
 }
 
 .flex-1 {
@@ -91,7 +102,15 @@ body {
 }
 
 .padding {
-    padding: 2em;
+    padding: 1em;
+}
+
+.gap {
+    gap: 1em;
+}
+
+.bold {
+    font-weight: bold;
 }
 
 .round-button {
@@ -103,7 +122,38 @@ body {
     cursor: pointer;
     text-align: center;
     line-height: 1;
+    margin: 0px;
 }
+
+.font-button {
+    font-size: 1.5em;
+    cursor: pointer;
+    text-align: center;
+    line-height: 0.5;
+    border: none;
+    background-color: transparent;
+    display: inline;
+    margin: 0px;
+    padding: 0px;
+}
+
+.text-button {
+    font-size: 1em;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    display: inline;
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin: 0px;
+}
+
+.modal {
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: auto;
+}
+
 
 @keyframes loading {
     from {
@@ -115,14 +165,11 @@ body {
     }
 }
 
-plot-configurator {
+
+plot-creator {
     position: fixed;
     bottom: 10px;
     right: 10px;
 }
 
-plot-creator {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-}
+
