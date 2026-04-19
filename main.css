@@ -76,6 +76,10 @@ body {
     justify-content: flex-end;
 }
 
+.justify-between {
+    justify-content: space-between;
+}
+
 .flex-1 {
     flex: 1;
 }
@@ -135,6 +139,7 @@ body {
     display: inline;
     margin: 0px;
     padding: 0px;
+    color: inherit;
 }
 
 .text-button {
@@ -146,6 +151,7 @@ body {
     padding: 4px 8px;
     border-radius: 2px;
     margin: 0px;
+    color: inherit;
 }
 
 .text-button:disabled{
@@ -172,15 +178,9 @@ body {
 }
 
 
-plot-creator {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-}
-
 config-modal {
     position: fixed;
     bottom: 10px;
-    left: 10px;
+    right: 10px;
 }
 

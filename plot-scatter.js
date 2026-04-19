@@ -57,7 +57,6 @@ class PlotScatter extends HTMLElement {
         plotMessage.textContent = 'loading...';
         this.appendChild(plotMessage);
 
-        console.log('Rendering plot with config:', this._config);
 
         if (!this._config) {
             plotMessage.textContent = 'Invalid plot configuration';
@@ -79,7 +78,6 @@ class PlotScatter extends HTMLElement {
         const xparam = x.name;
         const y1Param = y.name;
         const colorParam = color.name;
-        console.log('Constructed query parameters with color:', { xparam, y1Param, colorParam });
         const queryUrl = `${url}?${xparam},${y1Param},${colorParam}&time>=max(time)-356d`;
         return fetch(queryUrl)
         .then(response => response.json())
